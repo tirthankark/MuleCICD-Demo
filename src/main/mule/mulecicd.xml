@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="c8108ece-5688-4ffd-8a11-a6c15d9adc83" >
+		<http:listener-connection host="${https.host}" port="${https.port}" protocol="HTTPS">
+			<tls:context >
+				<tls:key-store type="jks" path="keystore.jks" alias="localhost1" keyPassword="password" password="password" />
+			</tls:context>
+		</http:listener-connection>
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="25bc1cba-fd18-46fe-8c2f-f5cd96db6644" >
+		<http:request-connection host="jsonplaceholder.typicode.com" port="80" />
+	</http:request-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="46440221-c117-4853-b606-7f065e5ba62e" file="app.properties" />
+	<sub-flow name="Response" doc:id="7a9e7989-ff42-4fdc-807a-d62f67995066" >
+		<ee:transform doc:name="Response Payload" doc:id="4b0c1113-f95d-48b3-bd84-0fc948eafefd">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	event: "HYD_MULE_MEETUP",
+	time: now(),
+	with: "Santosh and Shravan",
+	deployType: "Jenkins",
+	venue: "Home!"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<flow name="mulecicdFlow" doc:id="794df9a7-99b3-499a-aecd-2817b73c119b" >
+		<http:listener doc:name="Listener" doc:id="2430433d-5ba9-463e-82ec-220f814ac837" config-ref="HTTP_Listener_config" path="/"/>
+		<flow-ref doc:name="Flow Reference" doc:id="bc487aba-f3a4-4741-b2e1-03408ecd3b22" name="Response" />
+	</flow>
+</mule>
